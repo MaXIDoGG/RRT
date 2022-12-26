@@ -32,7 +32,7 @@ class RRT(object):
         self.end = Node(goal[0], goal[1])
         self.min_rand = rand_area[0]
         self.max_rand = rand_area[1]
-        self.N = 2000
+        self.N = 5000
         self.obstacleList = obstacle_list
         self.nodeList = [self.start]
         self.path = []
@@ -51,22 +51,52 @@ class RRT(object):
         node = [node_x, node_y]
         return node
 
+    @staticmethod
+    def pointOnLine(a, b, c):
+        dx = b[0] - a[0]
+        dy = b[1] - a[1]
+        d2 = dx*dx + dy*dy
+        nx = ((c[0]-a[0])*dx + (c[1]-a[1])*dy) / d2
+        nx = min(1, max(0, nx))
+        return [dx*nx + a[0], dy*nx + a[1]]
+
+    @staticmethod
+    def Length(a, b):
+        return (a[0] - b[0])**2 + (a[1] - b[1])**2
+
     def Nearest(self, rnd):
-        d_list = [(node.x - rnd[0]) ** 2 + (node.y - rnd[1])
+        d_list = [(node.x - rnd[0])**2 + (node.y - rnd[1])
                   ** 2 for node in self.nodeList]
         min_index = d_list.index(min(d_list))
+        minNode = self.nodeList[min_index]
+        minPoint = []
+        minLength = math.inf
+        minA = None
+        minB = None
+        for i in range(len(self.nodeList)):
+            if i == len(self.nodeList) - 1:
+                break
+            a = self.nodeList[i]
+            if a.parent != None:
+                b = self.nodeList[a.parent]
+            else:
+                continue
+            point = self.pointOnLine([a.x, a.y], [b.x, b.y], rnd)
+            L = self.Length(point, rnd)
+            if L < minLength:
+                minPoint = point
+                minLength = L
+                minA = i
+                minB = a.parent
 
-        # d1_list = []
-        # for node in self.nodeList:
-        #     if node.parent == None:
-        #         continue
-
-        # if d_list[min_index] > (node.x - rnd[0]) ** 2 + (node.y - rnd[1])
-        # ** 2
-        # d1_list.append([(node.x + self.nodeList[node.parent].x)/2, (node.y + self.nodeList[node.parent].y)/2])
-
-        # if d_list[min_index] >
-        return min_index
+        if minLength < self.Length([minNode.x, minNode.y], rnd):
+            minPoint = Node(minPoint[0], minPoint[1])
+            minPoint.parent = minB
+            self.nodeList.append(minPoint)
+            self.nodeList[minA].parent = self.nodeList.index(self.nodeList[-1])
+            return self.nodeList[minA].parent
+        else:
+            return min_index
 
     @staticmethod
     def g(a, b, d):

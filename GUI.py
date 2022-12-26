@@ -33,7 +33,7 @@ plt = figure.add_subplot(1, 1, 1)
 
 
 obstacle_list = [
-    ([1, -10], [5, 1], [1, 10])]
+    ([1, -10], [5, 1], [1, 5])]
 
 rrt = main([0, 0], [8, 9], [-10, 10], obstacle_list)
 
