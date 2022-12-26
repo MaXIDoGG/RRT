@@ -4,7 +4,7 @@ import math
 def BuildPath(Parent, s, e):
     path = [e]
     if (e not in Parent):
-        return ('пути нет')
+        return ('Error')
     for i in range(len(Parent)):
         if path[i] == s:
             break

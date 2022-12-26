@@ -32,7 +32,7 @@ class RRT(object):
         self.end = Node(goal[0], goal[1])
         self.min_rand = rand_area[0]
         self.max_rand = rand_area[1]
-        self.N = 2345
+        self.N = 2000
         self.obstacleList = obstacle_list
         self.nodeList = [self.start]
         self.path = []
@@ -71,7 +71,7 @@ class RRT(object):
     @staticmethod
     def g(a, b, d):
         r = (d[0] - a[0]) * (b[1] - a[1]) - (d[1] - a[1]) * (b[0] - a[0])
-        if abs(r) < 0.000001:
+        if abs(r) < 0.000000001:
             return 0
         elif r < 0:
             return -1
@@ -119,12 +119,17 @@ class RRT(object):
         return matrix
 
     def ShortestPath(self):
+        if self.path == "Error":
+            return "Error"
         m = self.Matrix()
         path = Dijkstra(m, 0, len(self.nodeList)-1)
+        if path == 'Error':
+            return "Error"
         self.path = path
         return path
 
     def Planning(self):
+        errors = 0
         for i in range(1, self.N):
             Qrand = self.RandomSample()
             min_index = self.Nearest(Qrand)
@@ -137,8 +142,13 @@ class RRT(object):
             self.nodeList.append(new_node)
 
         min_index = self.Nearest([self.end.x, self.end.y])
+        min_elem = self.nodeList[min_index]
         self.end.parent = min_index
-        self.nodeList.append(self.end)
+        if self.CollisionFree([self.end.x, self.end.y], [min_elem.x, min_elem.y]):
+            self.nodeList.append(self.end)
+        else:
+            print("error")
+            return False
 
 
 def main(start, goal, rand_area, obstacle_list):
@@ -147,7 +157,11 @@ def main(start, goal, rand_area, obstacle_list):
     # Set Initial parameters
     rrt = RRT(start=start, goal=goal, rand_area=rand_area,
               obstacle_list=obstacle_list)
-    rrt.Planning()
-    path = rrt.ShortestPath()
-    print(path)
+    if rrt.Planning() == False:
+        rrt.path = "Error"
+    else:
+        rrt.path = rrt.ShortestPath()
+        print(rrt.path)
+        if rrt.path == 'Error':
+            print('Пути нет')
     return rrt

@@ -3,7 +3,8 @@ from matplotlib.figure import Figure
 import matplotlib
 from tkinter.ttk import *
 from tkinter import *
-import numpy as np
+from tkinter.filedialog import *
+from tkinter import messagebox as mbox
 from matplotlib.patches import Polygon
 from algo import main
 
@@ -11,13 +12,28 @@ matplotlib.use("TkAgg")
 root = Tk()
 root.title('RRT')
 
+
+def Save():
+    f = asksaveasfile(initialfile='Untitled.json',
+                      defaultextension=".json", filetypes=[("All Files", "*.*"), ("Images", "*.json")])
+
+
+root.geometry("1000x800")
+
+
+frame_buttons = Frame(root, relief=RAISED, borderwidth=1, background="#FFF")
+frame_buttons.pack(fill=BOTH, expand=True)
+# Кнопка сохранения
+saveButton = Button(frame_buttons, text="Сохранить",
+                    command=lambda: Save())
+saveButton.pack(side=LEFT, padx=5, pady=5)
+
 figure = Figure(figsize=(10, 8), dpi=100)
 plt = figure.add_subplot(1, 1, 1)
 
 
 obstacle_list = [
-    ([1, 1], [5, 1], [1, 6]),
-    ([4, 1], [5, 1], [4, 3])]
+    ([1, -10], [5, 1], [1, 10])]
 
 rrt = main([0, 0], [8, 9], [-10, 10], obstacle_list)
 
@@ -34,13 +50,17 @@ plt.plot(rrt.start.x, rrt.start.y, "^r")
 plt.plot(rrt.end.x, rrt.end.y, "^b")
 plt.axis([rrt.min_rand, rrt.max_rand, rrt.min_rand, rrt.max_rand])
 
-plt.plot([rrt.nodeList[data].x for data in rrt.path], [
-         rrt.nodeList[data].y for data in rrt.path], '-r')
-plt.grid(True)
+if rrt.path != 'Error':
+    plt.plot([rrt.nodeList[data].x for data in rrt.path], [
+        rrt.nodeList[data].y for data in rrt.path], '-r')
+    plt.grid(True)
+else:
+    print(1)
+    mbox.showwarning("Ошибка", "Не удалось найти путь")
 
 
 canvas = FigureCanvasTkAgg(figure, root)
-canvas.get_tk_widget().grid(row=0, column=0)
+canvas.get_tk_widget().pack()
 
 
 root.mainloop()
