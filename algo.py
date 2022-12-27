@@ -32,7 +32,7 @@ class RRT(object):
         self.end = Node(goal[0], goal[1])
         self.min_rand = rand_area[0]
         self.max_rand = rand_area[1]
-        self.N = 5000
+        self.N = 1000
         self.obstacleList = obstacle_list
         self.nodeList = [self.start]
         self.path = []
